@@ -20,7 +20,7 @@ function usage() {
   echo "  -c    Specify kubectl context (optional)"
   echo "  -h    Show usage"
   echo ""
-  echo "Example: kport controller-api -c maru -n akkeris-system"
+  echo "Example: kport controller-api 8080 80 -c maru -n akkeris-system"
   
   if [ -n "$1" ]; then
     echo -e "\n${red}$1${reset}";

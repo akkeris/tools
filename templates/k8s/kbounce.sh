@@ -5,38 +5,20 @@
 ## AUTHOR: Sam Beckett (@sbeck14)
 ##====================================================================================
 
-# Color functions
-red=$(eval "tput setaf 1")
-green=$(eval "tput setaf 2")
-yellow=$(eval "tput setaf 3")
-reset=$(eval "tput sgr0")
+# m4_ignore(
+  echo "This is just a script template, not the script (yet) - pass it to 'argbash' to fix this." >&2
+  exit 11  
+#)
+# ARG_OPTIONAL_SINGLE([namespace], [n], [Specify kubernetes namespace], [akkeris-system])
+# ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context], [current-context])
+# ARG_POSITIONAL_SINGLE([pod], [Search term for target pod (e.g. controller-api)])
+# ARG_DEFAULTS_POS
+# ARG_HELP([kport], [Restart multiple Kubernetes pods based on a grep search])
+# ARGBASH_GO
 
-# Usage statement
-function usage() {
-  echo "Restart multiple Kubernetes pods based on a grep search"
-  echo ""
-  echo "Usage: kbounce [search term]"
-  echo "  -n    Kubernetes namespace (default akkeris-system)"
-  echo "  -c    Specify kubectl context (optional)"
-  echo "  -h    Show usage"
-  echo ""
-  echo "Example: kbounce controller-api -c maru -n akkeris-system"
-  
-  if [ -n "$1" ]; then
-    echo -e "\n${red}$1${reset}";
-  fi
-  
-  exit 1
-}
+# [ <-- needed because of Argbash
 
-if [ "$#" -lt 1 ]; then
-  usage "Search term required"
-fi
-
-if [[ $1 =~ ^-.$ ]]; then
-  usage "Search term must come first"
-fi
-
+# Dependency checks
 if ! command -v kubectl &> /dev/null
 then
   usage "Required dependency kubectl not found"
@@ -47,35 +29,12 @@ then
   usage "Required dependency grep not found"
 fi
 
-ns="akkeris-system"
-ctx=`kubectl config current-context`
-name=$1
-shift
+ns=$_arg_namespace
+ctx=$_arg_context
+name=$_arg_pod
 
-# Process command-line options
-while getopts ":n:c:h" opt; do
-  case ${opt} in
-    n ) # process namespace
-      ns="$OPTARG"
-      ;;
-    c ) # process context
-      ctx="$OPTARG"
-      ;;
-    h ) # show help
-      usage
-      ;;
-    \? ) # process invalid options
-      usage "-$OPTARG is not a valid option"
-      ;;
-    : ) # process invalid argument to an option
-      usage "-$OPTARG requires an argument"
-      ;;
-  esac
-done
-shift $((OPTIND -1))
-
-if [ "$#" -gt 0 ]; then
-  usage "Extra arguments are not allowed"
+if [ "$ctx" = "current-context" ]; then
+  ctx=`kubectl config current-context`
 fi
 
 ##============================================
@@ -117,3 +76,5 @@ if [ ${#podlist[@]} -lt 1 ]
         esac
     done
 fi
+
+# ] <-- needed because of Argbash

@@ -1,8 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ "$CLUSTER" == "" ]; then
-	echo "No CLUSTER environment variable was specified"
-	exit 1
+##====================================================================================
+## DESCRIPTION: Script that finds orphaned Redis resources in AWS
+## AUTHOR: Trevor Linton (@trevorlinton)
+##====================================================================================
+
+# m4_ignore(
+  echo "This is just a script template, not the script (yet) - pass it to 'argbash' to fix this." >&2
+  exit 11  
+#)
+# ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context], [current-context])
+# ARG_HELP([Find a list of Redis resources in AWS that are not attached to either the database-broker or controller-api])
+# ARGBASH_GO
+
+# [ <-- needed because of Argbash
+
+CLUSTER=$_arg_context
+
+if [ "$CLUSTER" = "current-context" ]; then
+  CLUSTER=`kubectl config current-context`
 fi
 
 aws elasticache describe-cache-clusters --max-items 200 > clusters.json
@@ -39,3 +55,5 @@ while read p; do
         echo "$p" >> found-in-app-controller.txt
     fi
 done <found-in-elasticache-broker.txt
+
+# ] <-- needed because of Argbash

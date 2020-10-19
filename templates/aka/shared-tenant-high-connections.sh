@@ -5,51 +5,18 @@
 ## AUTHOR: Sam Beckett (@sbeck14)
 ##====================================================================================
 
-##============================================
-## Helper Functions
-##============================================
+# m4_ignore(
+  echo "This is just a script template, not the script (yet) - pass it to 'argbash' to fix this." >&2
+  exit 11  
+#)
+# ARG_POSITIONAL_SINGLE([shared_tenant_database_name])
+# ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context], [current-context])
+# ARG_OPTIONAL_SINGLE([threshold], [t], [Connection count threshold], [20])
+# ARG_OPTIONAL_SINGLE([output], [o], [Output format (table or json)], [table])
+# ARG_HELP([shared-tenant-high-connections], [Get a list of apps with high connection counts to a given shared tenant database])
+# ARGBASH_GO
 
-# Color functions
-# Useful for changing the color of displayed text
-# Example: echo -e "${red}WARNING${reset}"
-red=$(eval "tput setaf 1")
-green=$(eval "tput setaf 2")
-yellow=$(eval "tput setaf 3")
-reset=$(eval "tput sgr0")
-
-# Usage statement
-# Prints information on how to use the script, including arguments and options
-function usage() {
-  echo "Find apps with high connection counts on shared tenant databases"
-  echo ""
-  echo "Usage: st-high-connections [database name]"
-  echo "  -c    Specify kubectl context (optional, default current-context)"
-  echo "  -t    Connection count threshold (optional, default 20)"
-  echo "  -o    Output format (optional, default table. options: table, json)"
-  echo "  -h    Show usage"
-  echo ""
-  echo "Example: st-high-connections hobbydb -c ds1 -t 25"
-  
-  if [ -n "$1" ]; then
-    echo -e "\n${red}$1${reset}";
-  fi
-  
-  exit 1
-}
-
-# Show usage statement if -h is first argument
-if [ "$1" == "-h" ]; then
-  usage
-fi
-
-# Check for required arguments
-if [ "$#" -lt 1 ]; then
-  usage "Database name required"
-fi
-
-if [[ $1 =~ ^-.*$ ]]; then
-  usage "Database name must come before options"
-fi
+# [ <-- needed because of Argbash
 
 # Dependency check
 if ! command -v jq &> /dev/null
@@ -67,45 +34,19 @@ then
   usage "Required dependency psql not found"
 fi
 
-ctx=`kubectl config current-context`
-outputfmt="table"
-threshold=20
-stname=$1
-shift
-
-# Process command-line options
-# See getopts documentation for more info
-while getopts ":o:t:c:h" opt; do
-  case ${opt} in
-    o ) # process output format
-      outputfmt="$OPTARG"
-      ;;
-    t ) # process threshold
-      threshold="$OPTARG"
-      ;;
-    c ) # process context
-      ctx="$OPTARG"
-      ;;
-    h ) # show help
-      usage
-      ;;
-    \? ) # process invalid options
-      usage "-$OPTARG is not a valid option"
-      ;;
-    : ) # process invalid argument to an option
-      usage "-$OPTARG requires an argument"
-      ;;
-  esac
-done
-shift $((OPTIND -1))
-
-if [ "$#" -gt 0 ]; then
-  usage "Extra arguments are not allowed"
-fi
 
 ##============================================
 ## Main Functionality
 ##============================================
+
+stname=$_arg_shared_tenant_database_name
+ctx=$_arg_context
+threshold=$_arg_threshold
+outputfmt=$_arg_output
+
+if [ "$ctx" = "current-context" ]; then
+  ctx=`kubectl config current-context`
+fi
 
 echo -e "${yellow}Getting connection counts over ${reset}$threshold${yellow} for ${reset}$stname${yellow} in ${reset}$ctx${yellow}...${reset}"
 
@@ -118,10 +59,10 @@ if [ -z "$stdb" ]; then
 fi
 
 # database-broker database URL
-brokerdb=`kubectl --context $ctx get configmap -n akkeris-system database-broker -o json | jq '.data.DATABASE_URL' -r`
+brokerdb=`kubectl --context $ctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
 
 # controller-api database URL
-controllerdb=`kubectl --context $ctx get configmap -n akkeris-system controller-api -o json | jq '.data.DATABASE_URL' -r`
+controllerdb=`kubectl --context $ctx get configmap -n akkeris-system controller-api -o jsonpath='{.data.DATABASE_URL}'`
 
 # Get connection counts over $threshold in the shared tenant database
 connection_counts=`psql $stdb -t -c "
@@ -194,3 +135,5 @@ case $outputfmt in
     echo $all_info | jq '.'
     ;;
 esac
+
+# ] <-- needed because of Argbash

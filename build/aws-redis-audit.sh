@@ -38,7 +38,7 @@ _arg_context="current-context"
 print_help()
 {
 	printf '%s\n' "Find a list of Redis resources in AWS that are not attached to either the database-broker or controller-api"
-	printf 'Usage: %s [-c|--context <arg>] [-h|--help]\n' "$0"
+	printf 'Usage: %s [-c|--context <arg>] [-h|--help]\n' "${0##*/}"
 	printf '\t%s\n' "-c, --context: Specify kubectl context (default: 'current-context')"
 	printf '\t%s\n' "-h, --help: Prints help"
 }

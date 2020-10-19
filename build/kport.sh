@@ -49,7 +49,7 @@ _arg_context="current-context"
 print_help()
 {
 	printf '%s\n' "kport"
-	printf 'Usage: %s [-n|--namespace <arg>] [-c|--context <arg>] [-h|--help] <pod> <source_port> <target_port>\n' "$0"
+	printf 'Usage: %s [-n|--namespace <arg>] [-c|--context <arg>] [-h|--help] <pod> <source_port> <target_port>\n' "${0##*/}"
 	printf '\t%s\n' "<pod>: Search term for target pod (e.g. controller-api)"
 	printf '\t%s\n' "<source_port>: Port to listen on locally"
 	printf '\t%s\n' "<target_port>: Port to forward in the pod"

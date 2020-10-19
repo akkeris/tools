@@ -45,7 +45,7 @@ _arg_output="table"
 print_help()
 {
 	printf '%s\n' "shared-tenant-high-connections"
-	printf 'Usage: %s [-c|--context <arg>] [-t|--threshold <arg>] [-o|--output <arg>] [-h|--help] <shared_tenant_database_name>\n' "$0"
+	printf 'Usage: %s [-c|--context <arg>] [-t|--threshold <arg>] [-o|--output <arg>] [-h|--help] <shared_tenant_database_name>\n' "${0##*/}"
 	printf '\t%s\n' "-c, --context: Specify kubectl context (default: 'current-context')"
 	printf '\t%s\n' "-t, --threshold: Connection count threshold (default: '20')"
 	printf '\t%s\n' "-o, --output: Output format (table or json) (default: 'table')"

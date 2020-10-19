@@ -45,7 +45,7 @@ _arg_context="current-context"
 print_help()
 {
 	printf '%s\n' "kport"
-	printf 'Usage: %s [-n|--namespace <arg>] [-c|--context <arg>] [-h|--help] <pod>\n' "$0"
+	printf 'Usage: %s [-n|--namespace <arg>] [-c|--context <arg>] [-h|--help] <pod>\n' "${0##*/}"
 	printf '\t%s\n' "<pod>: Search term for target pod (e.g. controller-api)"
 	printf '\t%s\n' "-n, --namespace: Specify kubernetes namespace (default: 'akkeris-system')"
 	printf '\t%s\n' "-c, --context: Specify kubectl context (default: 'current-context')"

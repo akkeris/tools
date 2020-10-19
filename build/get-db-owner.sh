@@ -41,7 +41,7 @@ _arg_context="current-context"
 print_help()
 {
 	printf '%s\n' "get-db-owner"
-	printf 'Usage: %s [-c|--context <arg>] [-h|--help] <database_name>\n' "$0"
+	printf 'Usage: %s [-c|--context <arg>] [-h|--help] <database_name>\n' "${0##*/}"
 	printf '\t%s\n' "-c, --context: Specify kubectl context (default: 'current-context')"
 	printf '\t%s\n' "-h, --help: Prints help"
 	printf '\n%s\n' "Find the owner application of a given database"

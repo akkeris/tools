@@ -47,8 +47,11 @@ do
   docker run --rm -v "$(pwd):/work" -u "$(id -u):$(id -g)" matejak/argbash:2.10.0 $template -o "build/$scriptname"
   
   # Add helper functions 
-  sed -i "/# \[ <-- needed because of Argbash/a $helpers" build/$scriptname
+  sed -i "/# Argbash is FREE SOFTWARE, see https:\/\/argbash.io for more info/a $helpers" build/$scriptname
 
   # Replace "$0" with "${0##*/}"
   sed -i 's/\"\$0\"/\"\$\{0##*\/\}\"/g' build/$scriptname
+
+  # Replace "FATAL ERROR:" with a red x
+  sed -i 's/FATAL ERROR:/\n${red}✗${reset}/g' build/$scriptname
 done

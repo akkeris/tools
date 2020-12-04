@@ -4,6 +4,7 @@ A collection of scripts that can be helpful when developing and troubleshooting 
 
 ## Table of Contents
 - [akkeris-tools](#akkeris-tools)
+	- [Table of Contents](#table-of-contents)
 	- [Bash Scripts](#bash-scripts)
 		- [Installation](#installation)
 		- [Development](#development)
@@ -11,6 +12,7 @@ A collection of scripts that can be helpful when developing and troubleshooting 
 			- [Using Argbash](#using-argbash)
 			- [Creating an Argbash Template](#creating-an-argbash-template)
 			- [Helper Functions](#helper-functions)
+	- [Service Token Generation](#service-token-generation)
 
 ## Bash Scripts
 

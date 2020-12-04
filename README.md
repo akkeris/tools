@@ -2,21 +2,35 @@
 
 A collection of scripts that can be helpful when developing and troubleshooting Akkeris.
 
-## Installation
+## Table of Contents
+- [akkeris-tools](#akkeris-tools)
+	- [Table of Contents](#table-of-contents)
+	- [Bash Scripts](#bash-scripts)
+		- [Installation](#installation)
+		- [Development](#development)
+		- [Writing Scripts](#writing-scripts)
+			- [Using Argbash](#using-argbash)
+			- [Creating an Argbash Template](#creating-an-argbash-template)
+			- [Helper Functions](#helper-functions)
+	- [Service Token Generation](#service-token-generation)
+
+## Bash Scripts
+
+### Installation
 
 ```bash
 $ ./install.sh
 ```
 
-## Development
+### Development
 
 To build the latest version of the script templates in the `templates` directory, run `./build.sh`. Please note that if using MacOS, `gnu-sed` is required (`brew install gnu-sed`).
 
-## Writing Scripts
+### Writing Scripts
 
 We use [argbash](https://argbash.io/) to make parameter parsing easy. See the [argbash documentation](https://argbash.readthedocs.io/en/latest/) for detailed usage, or check out the quick tutorial below.
 
-### Using Argbash
+#### Using Argbash
 
 You can install argbash, but it's easiest to use it via Docker. The following script will create the `argbash-docker` and `argbash-init-docker` commands for easier usage via the command line:
 
@@ -26,7 +40,7 @@ printf '%s\n' '#!/bin/bash' 'docker run --rm -e PROGRAM=argbash-init -v "$(pwd):
 chmod a+x argbash-docker argbash-init-docker
 ```
 
-### Creating an Argbash Template
+#### Creating an Argbash Template
 
 To start, you can use `argbash-init-docker` to create a new template. The following command will create a template with the `merp` positional argument and the `derp` optional argument:
 
@@ -105,10 +119,14 @@ option
 positional
 ```
 
-### Helper Functions
+#### Helper Functions
 
 The functions `red`, `green`, `yellow`, and `reset` will be injected into built scripts. They help color stdout text so you don't have to remember the command every time. Here's an example of how you use them:
 
 ```
 echo -e "\n${red}✗${reset} No pods matching \"$name\" found in the \"$ns\" namespace."
 ```
+
+## Service Token Generation
+
+See [akkeris-service-token-generator](akkeris-service-token-generator/README.md)

@@ -16,5 +16,5 @@ const username = process.env.USERNAME || 'serviceaccount';
 const apiEndpoint = process.env.AKKERIS_API;
 
 create_temp_jwt_token(process.env.JWT_PRIVATE_KEY, username, apiEndpoint, apiEndpoint, ttl, false, {})
-  .then((x) => console.log(x))
-  .catch((e) => console.error(e));
+  .then(console.log)
+  .catch(console.error);

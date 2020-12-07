@@ -19,41 +19,31 @@ async function jwks_sign(pem, data) {
   return await jose.JWS.createSign({ "alg": "RS256"}, await jose.JWK.asKey(pem, 'pem')).update(data).final()
 }
 
-async function jwks_verify(pem, intended_issuer, intended_audience, data, signature) {
-  assert.ok(pem, 'The private key JWT_PUBLIC_CERT was not found.');
-  if (typeof data !== 'string') {
-    data = JSON.stringify(data);
-  }
-  if (Buffer.isBuffer(pem)) {
-    pem = pem.toString('utf8');
-  }
-  pem = pem.trim();
+async function jwks_verify(pem, token, intended_issuer, intended_audience) {
+
   const cert = await jose.JWK.asKey(pem, 'pem');
-  const full_signature = {
-    payload: jose.util.base64url.encode(Buffer.from(data)),
-    signatures: [
-      {
-        protected: jose.util.base64url.encode(JSON.stringify({ alg: 'RS256', kid: cert.kid })),
-        signature,
-      },
-    ],
-  };
-  let payload = await jose.JWS.createVerify(cert).verify(full_signature);
-  payload = JSON.parse(payload.payload.toString('utf8'));
+  const result = await jose.JWS.createVerify(cert).verify(token);
+
+  const payload = JSON.parse(result.payload.toString('utf8'));
+
   // check standard JWT token parameters
   assert.ok(
     (payload.iss && intended_issuer && payload.iss === intended_issuer) || !intended_issuer || !payload.iss,
     'Unauthorized: issuer is invalid',
   );
+
   assert.ok(payload.exp && payload.exp > Math.floor((new Date()).getTime() / 1000), 'Unauthorized: token is expired, or has no "exp" field.');
+
   assert.ok(
     (payload.aud && intended_audience && payload.aud === intended_audience) || !intended_audience || !payload.aud,
     'Unauthorized: audience is invalid',
   );
+
   assert.ok(
     (payload.nbf && payload.nbf < Math.floor((new Date()).getTime()) / 1000) || !payload.nbf,
     'Unauthorized: token cannot be used yet, now < "nbf" field.',
   );
+
   return payload;
 }
   

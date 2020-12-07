@@ -8,11 +8,18 @@ Run `source get_config.sh` to save the JWT private & public keys needed to gener
 
 Set the following additional environment variables: 
  
- - `TOKEN_TTL`: Time that the token should be valid for (in seconds). Default is 10 years (315360000) for a long-lived service token
- - `USERNAME`: Name of the service requesting the service token
+ - `TOKEN_TTL`: Time that the token should be valid for (in seconds). Default is 86400 (24 hours in seconds = 60 * 60 * 24), but you could use 10 years (315360000) for a long-lived service token
+ - `SERVICE_NAME`: Name of the service requesting the service token
  - `AKKERIS_API`: Endpoint of the Akkeris API (e.g. https://apps.yourdomain.io)
 
 Then, run `npm run generate` to generate the service token.
+
+### Example
+
+```bash
+source get_config.sh
+TOKEN_TTL=86400 SERVICE_NAME=myservice AKKERIS_API=https://apps.yourdomain.io npm run verify
+```
 
 ## Token Verification
 

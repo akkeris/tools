@@ -9,12 +9,12 @@ assert.ok(process.env.AKKERIS_API, 'The environment variable AKKERIS_API was not
 const ttl = Number.isInteger(Number.parseInt(process.env.TOKEN_TTL, 10))
   ? Number.parseInt(process.env.TOKEN_TTL, 10) : 60 * 60 * 24;
 
-// Username of the token requestor
-const username = process.env.USERNAME || 'serviceaccount';
+// Service name of the token requestor
+const servicename = process.env.SERVICE_NAME || 'serviceaccount';
 
 // Endpoint of the Akkeris API
 const apiEndpoint = process.env.AKKERIS_API;
 
-create_temp_jwt_token(process.env.JWT_PRIVATE_KEY, username, apiEndpoint, apiEndpoint, ttl, false, {})
+create_temp_jwt_token(process.env.JWT_PRIVATE_KEY, servicename, apiEndpoint, apiEndpoint, ttl, false, {})
   .then(console.log)
   .catch(console.error);

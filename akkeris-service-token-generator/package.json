@@ -7,8 +7,8 @@
     "node-jose": "^1.1.4"
   },
   "scripts": {
-    "generate": "node generate.js",
-    "verify": "node verify.js"
+    "generate-token": "node generate-token.js",
+    "verify-token": "node verify.js"
   },
   "contributors": [
     "Trevor Linton",

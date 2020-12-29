@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##====================================================================================
-## DESCRIPTION: Find apps with high connection counts on shared tenant databases
+## DESCRIPTION: Find apps associated with a shared tenant database
 ## AUTHOR: Sam Beckett (@sbeck14)
 ##====================================================================================
 

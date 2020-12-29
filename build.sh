@@ -54,4 +54,6 @@ do
 
   # Replace "FATAL ERROR:" with a red x
   sed -i 's/FATAL ERROR:/\n${red}✗${reset}/g' build/$scriptname
+  
+  echo "Built `basename $scriptname .sh`"
 done

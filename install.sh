@@ -13,4 +13,5 @@ for script in $SCRIPTS
 do
   scriptname=`basename $script .sh`
   cp $script /usr/local/bin/$scriptname
+  echo "Installed $scriptname"
 done

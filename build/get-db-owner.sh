@@ -7,7 +7,8 @@
 
 #
 # ARG_POSITIONAL_SINGLE([database_name])
-# ARG_OPTIONAL_SINGLE([context],[c],[Specify kubectl context],[current-context])
+# ARG_OPTIONAL_SINGLE([context],[c],[Specify kubectl context for controller cluster],[current-context])
+# ARG_OPTIONAL_SINGLE([database_context],[d],[Specify kubectl context for database cluster],[current-context])
 # ARG_HELP([get-db-owner],[Find the owner application of a given database])
 # ARGBASH_GO()
 # needed because of Argbash --> m4_ignore([
@@ -33,7 +34,7 @@ die()
 
 begins_with_short_option()
 {
-	local first_option all_short_options='ch'
+	local first_option all_short_options='cdh'
 	first_option="${1:0:1}"
 	test "$all_short_options" = "${all_short_options/$first_option/}" && return 1 || return 0
 }
@@ -42,13 +43,15 @@ begins_with_short_option()
 _positionals=()
 # THE DEFAULTS INITIALIZATION - OPTIONALS
 _arg_context="current-context"
+_arg_database_context="current-context"
 
 
 print_help()
 {
 	printf '%s\n' "get-db-owner"
-	printf 'Usage: %s [-c|--context <arg>] [-h|--help] <database_name>\n' "${0##*/}"
-	printf '\t%s\n' "-c, --context: Specify kubectl context (default: 'current-context')"
+	printf 'Usage: %s [-c|--context <arg>] [-d|--database_context <arg>] [-h|--help] <database_name>\n' "${0##*/}"
+	printf '\t%s\n' "-c, --context: Specify kubectl context for controller cluster (default: 'current-context')"
+	printf '\t%s\n' "-d, --database_context: Specify kubectl context for database cluster (default: 'current-context')"
 	printf '\t%s\n' "-h, --help: Prints help"
 	printf '\n%s\n' "Find the owner application of a given database"
 }
@@ -71,6 +74,17 @@ parse_commandline()
 				;;
 			-c*)
 				_arg_context="${_key##-c}"
+				;;
+			-d|--database_context)
+				test $# -lt 2 && die "Missing value for the optional argument '$_key'." 1
+				_arg_database_context="$2"
+				shift
+				;;
+			--database_context=*)
+				_arg_database_context="${_key##--database_context=}"
+				;;
+			-d*)
+				_arg_database_context="${_key##-d}"
 				;;
 			-h|--help)
 				print_help
@@ -153,12 +167,18 @@ fi
 
 dbname=$_arg_database_name
 ctx=$_arg_context
+dbctx=$_arg_database_context
 
 if [ "$ctx" = "current-context" ]; then
   ctx=`kubectl config current-context`
 fi
 
-broker_db_url=`kubectl --context=$ctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
+if [ "$dbctx" = "current-context" ]; then
+  dbctx=`kubectl config current-context`
+fi
+
+broker_db_url=`kubectl --context=$dbctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
+
 controller_db_url=`kubectl --context=$ctx get configmap -n akkeris-system controller-api -o jsonpath='{.data.DATABASE_URL}'`
 
 service_id=`psql ${broker_db_url} -c "select id from databases where name = '$dbname' and deleted = false" -t | tr -d '[:space:]'`

@@ -10,7 +10,8 @@
   exit 11  
 #)
 # ARG_POSITIONAL_SINGLE([database_name])
-# ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context], [current-context])
+# ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context for controller cluster], [current-context])
+# ARG_OPTIONAL_SINGLE([database_context], [d], [Specify kubectl context for database cluster], [current-context])
 # ARG_HELP([get-db-owner], [Find the owner application of a given database])
 # ARGBASH_GO
 
@@ -44,12 +45,18 @@ fi
 
 dbname=$_arg_database_name
 ctx=$_arg_context
+dbctx=$_arg_database_context
 
 if [ "$ctx" = "current-context" ]; then
   ctx=`kubectl config current-context`
 fi
 
-broker_db_url=`kubectl --context=$ctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
+if [ "$dbctx" = "current-context" ]; then
+  dbctx=`kubectl config current-context`
+fi
+
+broker_db_url=`kubectl --context=$dbctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
+
 controller_db_url=`kubectl --context=$ctx get configmap -n akkeris-system controller-api -o jsonpath='{.data.DATABASE_URL}'`
 
 service_id=`psql ${broker_db_url} -c "select id from databases where name = '$dbname' and deleted = false" -t | tr -d '[:space:]'`

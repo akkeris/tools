@@ -8,6 +8,7 @@
 #
 # ARG_POSITIONAL_SINGLE([shared_tenant_database_name])
 # ARG_OPTIONAL_SINGLE([context],[c],[Specify kubectl context],[current-context])
+# ARG_OPTIONAL_SINGLE([database_context],[d],[Specify kubectl context for database cluster],[current-context])
 # ARG_OPTIONAL_SINGLE([output],[o],[Output format (table or json)],[table])
 # ARG_HELP([get-shared-tenant-apps],[Get a list of apps associated with a given shared tenant database])
 # ARGBASH_GO()
@@ -34,7 +35,7 @@ die()
 
 begins_with_short_option()
 {
-	local first_option all_short_options='coh'
+	local first_option all_short_options='cdoh'
 	first_option="${1:0:1}"
 	test "$all_short_options" = "${all_short_options/$first_option/}" && return 1 || return 0
 }
@@ -43,14 +44,16 @@ begins_with_short_option()
 _positionals=()
 # THE DEFAULTS INITIALIZATION - OPTIONALS
 _arg_context="current-context"
+_arg_database_context="current-context"
 _arg_output="table"
 
 
 print_help()
 {
 	printf '%s\n' "get-shared-tenant-apps"
-	printf 'Usage: %s [-c|--context <arg>] [-o|--output <arg>] [-h|--help] <shared_tenant_database_name>\n' "${0##*/}"
+	printf 'Usage: %s [-c|--context <arg>] [-d|--database_context <arg>] [-o|--output <arg>] [-h|--help] <shared_tenant_database_name>\n' "${0##*/}"
 	printf '\t%s\n' "-c, --context: Specify kubectl context (default: 'current-context')"
+	printf '\t%s\n' "-d, --database_context: Specify kubectl context for database cluster (default: 'current-context')"
 	printf '\t%s\n' "-o, --output: Output format (table or json) (default: 'table')"
 	printf '\t%s\n' "-h, --help: Prints help"
 	printf '\n%s\n' "Get a list of apps associated with a given shared tenant database"
@@ -74,6 +77,17 @@ parse_commandline()
 				;;
 			-c*)
 				_arg_context="${_key##-c}"
+				;;
+			-d|--database_context)
+				test $# -lt 2 && die "Missing value for the optional argument '$_key'." 1
+				_arg_database_context="$2"
+				shift
+				;;
+			--database_context=*)
+				_arg_database_context="${_key##--database_context=}"
+				;;
+			-d*)
+				_arg_database_context="${_key##-d}"
 				;;
 			-o|--output)
 				test $# -lt 2 && die "Missing value for the optional argument '$_key'." 1
@@ -142,17 +156,23 @@ assign_positional_args 1 "${_positionals[@]}"
 # Dependency check
 if ! command -v jq &> /dev/null
 then
-  usage "Required dependency jq not found"
+  echo "Required dependency jq not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v curl &> /dev/null
 then
-  usage "Required dependency curl not found"
+  echo "Required dependency curl not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v psql &> /dev/null
 then
-  usage "Required dependency psql not found"
+  echo "Required dependency psql not found"
+  print_help
+  exit 1
 fi
 
 
@@ -162,14 +182,20 @@ fi
 
 stname=$_arg_shared_tenant_database_name
 ctx=$_arg_context
+dbctx=$_arg_database_context
 outputfmt=$_arg_output
 
 if [ "$ctx" = "current-context" ]; then
   ctx=`kubectl config current-context`
 fi
 
+if [ "$dbctx" = "current-context" ]; then
+  dbctx=`kubectl config current-context`
+fi
+
+
 # Get shared tenant DB url
-stdb=`kubectl --context $ctx get configmap -n akkeris-system database-broker -o json | jq ".data[] | select(test(\".*@${stname}[.].*\"))" -r`
+stdb=`kubectl --context $dbctx get configmap -n akkeris-system database-broker -o json | jq ".data[] | select(test(\".*@${stname}[.].*\"))" -r`
 
 if [ -z "$stdb" ]; then
  echo "${red}✗${reset} Connection URL for $stname not found!"
@@ -177,7 +203,7 @@ if [ -z "$stdb" ]; then
 fi
 
 # database-broker database URL
-brokerdb=`kubectl --context $ctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
+brokerdb=`kubectl --context $dbctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
 
 # controller-api database URL
 controllerdb=`kubectl --context $ctx get configmap -n akkeris-system controller-api -o jsonpath='{.data.DATABASE_URL}'`

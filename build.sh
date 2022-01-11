@@ -15,7 +15,8 @@ fi
 # Dependency check
 if ! command -v docker &> /dev/null
 then
-  usage "Required dependency docker not found"
+  echo "Required dependency docker not found"
+  exit 1
 fi
 
 # Pull argbash image if not present

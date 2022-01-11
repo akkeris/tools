@@ -13,7 +13,7 @@
 # ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context], [current-context])
 # ARG_POSITIONAL_SINGLE([pod], [Search term for target pod (e.g. controller-api)])
 # ARG_DEFAULTS_POS
-# ARG_HELP([kport], [Restart multiple Kubernetes pods based on a grep search])
+# ARG_HELP([kbounce], [Restart multiple Kubernetes pods based on a grep search])
 # ARGBASH_GO
 
 # [ <-- needed because of Argbash
@@ -21,12 +21,16 @@
 # Dependency checks
 if ! command -v kubectl &> /dev/null
 then
-  usage "Required dependency kubectl not found"
+  echo "Required dependency kubectl not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v grep &> /dev/null
 then
-  usage "Required dependency grep not found"
+  echo "Required dependency grep not found"
+  print_help
+  exit 1
 fi
 
 ns=$_arg_namespace

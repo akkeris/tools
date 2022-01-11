@@ -150,12 +150,16 @@ assign_positional_args 1 "${_positionals[@]}"
 
 if ! command -v kubectl &> /dev/null
 then
-  usage "Required dependency kubectl not found"
+  echo "Required dependency kubectl not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v grep &> /dev/null
 then
-  usage "Required dependency grep not found"
+  echo "Required dependency grep not found"
+  print_help
+  exit 1
 fi
 
 ns=$_arg_namespace

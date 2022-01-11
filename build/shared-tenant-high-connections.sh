@@ -156,17 +156,23 @@ assign_positional_args 1 "${_positionals[@]}"
 # Dependency check
 if ! command -v jq &> /dev/null
 then
-  usage "Required dependency jq not found"
+  echo "Required dependency jq not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v curl &> /dev/null
 then
-  usage "Required dependency curl not found"
+  echo "Required dependency curl not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v psql &> /dev/null
 then
-  usage "Required dependency psql not found"
+  echo "Required dependency psql not found"
+  print_help
+  exit 1
 fi
 
 

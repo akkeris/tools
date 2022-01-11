@@ -11,6 +11,7 @@
 #)
 # ARG_POSITIONAL_SINGLE([shared_tenant_database_name])
 # ARG_OPTIONAL_SINGLE([context], [c], [Specify kubectl context], [current-context])
+# ARG_OPTIONAL_SINGLE([database_context], [d], [Specify kubectl context for database cluster], [current-context])
 # ARG_OPTIONAL_SINGLE([output], [o], [Output format (table or json)], [table])
 # ARG_HELP([get-shared-tenant-apps], [Get a list of apps associated with a given shared tenant database])
 # ARGBASH_GO
@@ -20,17 +21,23 @@
 # Dependency check
 if ! command -v jq &> /dev/null
 then
-  usage "Required dependency jq not found"
+  echo "Required dependency jq not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v curl &> /dev/null
 then
-  usage "Required dependency curl not found"
+  echo "Required dependency curl not found"
+  print_help
+  exit 1
 fi
 
 if ! command -v psql &> /dev/null
 then
-  usage "Required dependency psql not found"
+  echo "Required dependency psql not found"
+  print_help
+  exit 1
 fi
 
 
@@ -40,14 +47,20 @@ fi
 
 stname=$_arg_shared_tenant_database_name
 ctx=$_arg_context
+dbctx=$_arg_database_context
 outputfmt=$_arg_output
 
 if [ "$ctx" = "current-context" ]; then
   ctx=`kubectl config current-context`
 fi
 
+if [ "$dbctx" = "current-context" ]; then
+  dbctx=`kubectl config current-context`
+fi
+
+
 # Get shared tenant DB url
-stdb=`kubectl --context $ctx get configmap -n akkeris-system database-broker -o json | jq ".data[] | select(test(\".*@${stname}[.].*\"))" -r`
+stdb=`kubectl --context $dbctx get configmap -n akkeris-system database-broker -o json | jq ".data[] | select(test(\".*@${stname}[.].*\"))" -r`
 
 if [ -z "$stdb" ]; then
  echo "${red}✗${reset} Connection URL for $stname not found!"
@@ -55,7 +68,7 @@ if [ -z "$stdb" ]; then
 fi
 
 # database-broker database URL
-brokerdb=`kubectl --context $ctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
+brokerdb=`kubectl --context $dbctx get configmap -n akkeris-system database-broker -o jsonpath='{.data.DATABASE_URL}'`
 
 # controller-api database URL
 controllerdb=`kubectl --context $ctx get configmap -n akkeris-system controller-api -o jsonpath='{.data.DATABASE_URL}'`
